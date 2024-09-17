@@ -1,0 +1,4 @@
+[x] Init Repo
+[] convert xlsx to csv
+[] load csv's to df, summarize to new csv
+[] plotly
