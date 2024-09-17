@@ -5,8 +5,8 @@ import pandas as pd
 
 def grab_dr():
     # Specify the directory you want to pull files from
-    directory = 'temp/' #remove leading /
-
+    directory = r'R:/PE/DATA/' #remove leading /
+    
     # List to store CSV file names and their modification times
     csv_file_list = []
 
@@ -79,7 +79,7 @@ def grab_dr():
     combined_df = combined_df.sort_values(by='last_modified', ascending=True)
 
     # export
-    combined_df.to_csv('temp/ATP-DR-all.csv')
+    combined_df.to_csv(directory+'ATP-DR-all.csv')
 
     # get DATE_RANGE
     mind = combined_df['Start_Time'].min(); print(mind)
@@ -96,7 +96,7 @@ def grab_dr():
 
     # Load the additional CSV files: 'holidays.csv' and 'shutdowns.csv'
     downtimes = pd.read_csv('config/downtimes.csv')
-    print(downtimes)
+    #print(downtimes)
     # append
     for l in summary_df['Location'].unique():
         #add downtimes recipe , Locaiton, Time_Difference_Hours
@@ -112,10 +112,8 @@ def grab_dr():
         summary_df.loc[len(summary_df)] = ['idle',l,unused]
 
     # export
-    summary_df.to_csv('temp/atp-summ.csv') ; print('summary saved!')
+    fnd = directory+'atp-summ.csv'
+    summary_df.to_csv(fnd) ; print('summary saved!')
 
-    # Append the 'holidays.csv' and 'shutdowns.csv' DataFrames to the summary DataFrame
-    # summary_df = pd.concat([summary_df, holidays_df, shutdowns_df], ignore_index=True)
-
-    # Display the final summary table
-    # print(summary_df)
+    #
+    return fnd,mind,maxd
