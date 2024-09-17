@@ -59,7 +59,7 @@ def grab_dr():
         df.columns = df.columns.str.strip()
         df.columns = df.columns.str.replace(' ', '_')
             
-        #
+        # add
         df['recipe'] = os.path.basename(fn[22:-4])  # Add a column with the filename
         df['last_modified'] = mod_time  # Add a column with the modification time
 
@@ -78,8 +78,13 @@ def grab_dr():
     # Sort the combined DataFrame by the last modified date
     combined_df = combined_df.sort_values(by='last_modified', ascending=True)
 
+    # export
     combined_df.to_csv('temp/ATP-DR-all.csv')
-    # quit()
+
+    # get DATE_RANGE
+    mind = combined_df['Start_Time'].min(); print(mind)
+    maxd = combined_df['Start_Time'].max(); print(maxd)
+    DATE_RANGE = ((maxd-mind) / pd.Timedelta(hours=1))
 
     # Group by 'recipe' and 'Location' (renamed to 'event') and sum 'Time_Difference_Hours'
     summary_df = combined_df.groupby(['recipe', 'Location'], as_index=False)['Time_Difference_Hours'].sum().round(1)
@@ -90,17 +95,21 @@ def grab_dr():
     # quit()
 
     # Load the additional CSV files: 'holidays.csv' and 'shutdowns.csv'
-    holidays_df = pd.read_csv('config/holidays.csv')
-    holidays_sum = (holidays_df['Hours'].sum())
-    shutdowns_df = pd.read_csv('config/shutdowns.csv')
-    showdowns_sum = (shutdowns_df['Hours'].sum())
-    # print(holidays_sum , showdowns_sum)
-
+    downtimes = pd.read_csv('config/downtimes.csv')
+    print(downtimes)
     # append
-    for l in summary_df['Location']:
-        #recipe , Locaiton, Time_Difference_Hours
-        summary_df.loc[len(summary_df)] = ['Holidays',l,holidays_sum]
-        summary_df.loc[len(summary_df)] = ['Shutdowns',l,showdowns_sum]
+    for l in summary_df['Location'].unique():
+        #add downtimes recipe , Locaiton, Time_Difference_Hours
+        for i,r in downtimes.iterrows():
+            if(DATE_RANGE>300):
+                summary_df.loc[len(summary_df)] = [r[1],l,r[2]]
+            else:
+                summary_df.loc[len(summary_df)] = [r[1],l,round(r[2]*(DATE_RANGE/(365*24)),1)]
+                
+        # add unused
+        runt = summary_df[summary_df['Location']==l]['Time_Difference_Hours'].sum()
+        unused = (DATE_RANGE)-runt
+        summary_df.loc[len(summary_df)] = ['idle',l,unused]
 
     # export
     summary_df.to_csv('temp/atp-summ.csv') ; print('summary saved!')

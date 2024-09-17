@@ -1,4 +1,4 @@
-import atp_etl
+import atp_etl,atp_plot_util
 
 def some_func():
     1
@@ -8,3 +8,4 @@ if __name__ == '__main__':
     # test1.py executed as script
     # do something
     atp_etl.grab_dr()
+    atp_plot_util.plot_util()
